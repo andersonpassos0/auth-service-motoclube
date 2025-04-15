@@ -2,7 +2,7 @@ spring:
   application:
     name=auth-service
   datasource:
-    url: jdbc:h2.mem:Kauthdb
+    url: jdbc:h2:mem:authdb
     driver-class-name: org.h2.Driver
     username: sa
     password:
