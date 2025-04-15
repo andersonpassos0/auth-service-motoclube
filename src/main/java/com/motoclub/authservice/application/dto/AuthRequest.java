@@ -1,4 +1,17 @@
 package com.motoclub.authservice.application.dto;
 
-public record AuthRequest(String email, String password) {
-}
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+
+@Schema(description = "Requisição de autenticação do usuario")
+public record AuthRequest(
+
+        @Schema(description = "E-mail do usuário", example = "usuario@email.com")
+        @Email
+        @NotBlank
+        String email,
+
+        @Schema(description = "Senha do usuário", example = "minhasenha")
+        String password
+) {}

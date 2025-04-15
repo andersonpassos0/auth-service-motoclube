@@ -23,10 +23,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
     private final UserRepository userRepository;
 
-    @Override
+        @Override
     protected boolean shouldNotFilter(HttpServletRequest request){
         String path = request.getRequestURI();
-        System.out.println("ShouldNotFilter analisando path: " + path);
 
         boolean shouldSkip =  path.startsWith("/auth")
                                 || path.startsWith("/v3/api-docs")
@@ -38,7 +37,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                 || path.equals("/")
                                 || path.contains("favicon.ico");
 
-        System.out.println("shouldNotFilter analisando path: " + path + " => " + shouldSkip);
         return shouldSkip;
     }
 
@@ -47,35 +45,29 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
 
-        System.out.println("JwtAuthenticationFilter: Executando filtro para path: " + request.getRequestURI());
 
         String path = request.getRequestURI();
-        System.out.println("Requisição recebida em: "+ path);
 
         final String authHeader = request.getHeader("Authorization");
         final String token;
         final String email;
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")){
-            System.out.println("Header Authorization ausente ou invalido");
             filterChain.doFilter(request, response);
             return;
         }
 
-        if (authHeader.length() <= 7){
-            System.out.println("Header Authorization muito curto");
-            filterChain.doFilter(request, response);
-            return;
-        }
+//        if (authHeader.length() <= 7){
+//            filterChain.doFilter(request, response);
+//            return;
+//        }
 
         token = authHeader.substring(7);
         email = jwtService.extractEmail(token);
-        System.out.println("Email extraido: " + email);
 
         if (email != null && SecurityContextHolder.getContext().getAuthentication() == null){
             userRepository.findByEmail(email).ifPresent(user -> {
                 if (jwtService.isTokenValid(token, user)) {
-                    System.out.println("Token valido, autenticando...");
                     UserDetails userDetails = new org.springframework.security.core.userdetails.User(
                             user.getEmail(),
                             user.getPassword(),
@@ -85,8 +77,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
                     SecurityContextHolder.getContext().setAuthentication(authToken);
-                } else {
-                    System.out.println("Token inválido");
                 }
             });
         }
