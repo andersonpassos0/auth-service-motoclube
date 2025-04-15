@@ -1,4 +1,4 @@
-package com.motoclub.authservice.application.service;
+package com.motoclub.authservice.application.usecase;
 
 import com.motoclub.authservice.application.dto.AuthRequest;
 import com.motoclub.authservice.application.dto.AuthResponse;
