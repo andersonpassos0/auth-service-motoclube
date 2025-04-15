@@ -13,8 +13,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -54,5 +55,35 @@ public class RegisterUserUseCaseTest {
 
         assertNotNull(response);
         assertEquals(fakeToken, response.token());
+    }
+
+    @Test
+    void shouldThrowExceptionWhenSavingUserFails(){
+        RegisterRequest request = new RegisterRequest("Anderson", "anderson@email.com", "123456");
+        User user = User.builder()
+                .name(request.name())
+                .email(request.email())
+                .password(request.password())
+                .build();
+
+        when(passwordEncoder.encode(request.password())).thenReturn("encodedPassword");
+        when(userRepository.save(any(User.class))).thenThrow(new RuntimeException("Erro ao salvar usuário"));
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            registerUserUseCase.execute(request);
+        });
+
+        assertEquals("Erro ao salvar usuário", exception.getMessage());
+    }
+
+    @Test
+    void shouldThrowExceptionWhenEmailAlreadyExists(){
+        RegisterRequest request = new RegisterRequest("Anderson", "anderson@email.com", "123456");
+
+        when(userRepository.findByEmail(request.email())).thenReturn(Optional.of(new User()));
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            registerUserUseCase.execute(request);
+        });
     }
 }

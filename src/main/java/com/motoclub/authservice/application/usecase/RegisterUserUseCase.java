@@ -18,6 +18,10 @@ public class RegisterUserUseCase {
     private final JwtService jwtService;
 
     public AuthResponse execute(RegisterRequest request){
+
+        if(userRepository.findByEmail(request.email()).isPresent()){
+            throw new IllegalArgumentException("E-mail já está em uso.");
+        }
         User user = User.builder()
                 .name(request.name())
                 .email(request.email())
