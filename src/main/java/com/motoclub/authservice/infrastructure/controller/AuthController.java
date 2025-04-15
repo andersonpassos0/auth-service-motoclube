@@ -3,7 +3,7 @@ package com.motoclub.authservice.infrastructure.controller;
 import com.motoclub.authservice.application.dto.AuthRequest;
 import com.motoclub.authservice.application.dto.AuthResponse;
 import com.motoclub.authservice.application.dto.RegisterRequest;
-import com.motoclub.authservice.application.service.LoginUserUseCase;
+import com.motoclub.authservice.application.usecase.LoginUserUseCase;
 import com.motoclub.authservice.application.usecase.RegisterUserUseCase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
