@@ -2,19 +2,20 @@ package com.motoclub.authservice.infrastructure.controller;
 
 import com.motoclub.authservice.application.dto.AuthRequest;
 import com.motoclub.authservice.application.dto.AuthResponse;
+import com.motoclub.authservice.application.dto.AuthUserResponse;
 import com.motoclub.authservice.application.dto.RegisterRequest;
 import com.motoclub.authservice.application.usecase.LoginUserUseCase;
 import com.motoclub.authservice.application.usecase.RegisterUserUseCase;
+import com.motoclub.authservice.infrastructure.security.JwtService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/auth")
@@ -24,6 +25,7 @@ public class AuthController {
 
     private final RegisterUserUseCase registerUserUseCase;
     private final LoginUserUseCase loginUseruseCase;
+    private final JwtService jwtService;
 
     @PostMapping("/register")
     @Operation(summary = "Registrar novo usuário",
@@ -47,6 +49,31 @@ public class AuthController {
     public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest authRequest){
         AuthResponse response = loginUseruseCase.execute(authRequest);
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/validate")
+    @Operation(summary = "Validar Token",
+               description = "Verifica se o token passado é válido")
+    public ResponseEntity<AuthUserResponse> validateToken(@RequestHeader("Authorization") String tokenHeader){
+
+        if (tokenHeader == null || !tokenHeader.startsWith("Bearer ")){
+            return ResponseEntity.status(401).build();
+        }
+
+        String token = tokenHeader.substring(7);
+
+        if (!jwtService.isTokenValid(token)){
+            return ResponseEntity.status(401).build();
+        }
+
+        String username = jwtService.extractUsername(token);
+        List<String> roles = jwtService.extractRoles(token);
+
+        AuthUserResponse response = new AuthUserResponse(username, roles);
+
+        return  ResponseEntity.ok(response);
+
+
     }
 
 }
